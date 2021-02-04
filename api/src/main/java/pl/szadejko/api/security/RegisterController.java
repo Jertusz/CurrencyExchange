@@ -7,12 +7,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pl.szadejko.api.service.CurrencyService;
 
 @RestController
 @RequestMapping("/register")
 public class RegisterController {
     @Autowired
     UserService userService;
+
+    @Autowired
+    CurrencyService currencyService;
 
     @PostMapping
     public ResponseEntity register(@RequestBody User user) {
@@ -25,6 +29,7 @@ public class RegisterController {
         }
 
         userService.createOrUpdate(user);
+        currencyService.newAccount(user);
         return new ResponseEntity(HttpStatus.OK);
     }
 }

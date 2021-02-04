@@ -15,6 +15,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/login", "/register", "/move").permitAll()
                 .antMatchers("/users/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.POST, "/currency/deposit/**").authenticated()
+                .antMatchers(HttpMethod.POST, "/currency/withdraw/**").authenticated()
                 .antMatchers(HttpMethod.GET, "/**").hasAnyRole("USER", "PRIVILEGED", "ADMIN")
                 .antMatchers("/**").hasAnyRole("PRIVILEGED", "ADMIN")
                 .anyRequest().authenticated()
