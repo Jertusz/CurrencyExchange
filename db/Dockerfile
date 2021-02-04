@@ -1,2 +1,2 @@
 FROM mysql
-ENV MYSQL_DATABASE exchange
+ENV MYSQL_DATABASE exchangecontrol
