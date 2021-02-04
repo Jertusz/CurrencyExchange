@@ -1,0 +1,3 @@
+rootProject.name = 'currencyExchange'
+
+include 'exchange-api'
