@@ -43,12 +43,21 @@ databaseChangeLog:
             tableName: currency
             columns:
               - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: currency_id_pkey
+              - column:
                   name: user
                   type: INT
                   autoIncrement: false
                   constraints:
                     nullable: false
-                    foreignKeyName: user_id_fkey
+                    foreignKeyName: currency_user_id_fkey
+                    references: user(id)
               - column:
                   name: pln
                   type: DECIMAL(9,2)
