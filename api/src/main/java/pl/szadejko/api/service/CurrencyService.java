@@ -1,12 +1,18 @@
 package pl.szadejko.api.service;
 
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.mysql.cj.xdevapi.JsonArray;
+import org.apache.tomcat.util.json.JSONParser;
+import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import pl.szadejko.api.models.Currency;
 import pl.szadejko.api.repository.CurrencyRepository;
 import pl.szadejko.api.security.User;
 import pl.szadejko.api.security.UserService;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static pl.szadejko.api.utils.HelperFunctions.withdrawalPossible;
 
@@ -32,8 +38,14 @@ public class CurrencyService {
         return balance;
     }
 
-    public boolean exchangeCurrency(User user, String from, double amount, String to) {
-        return true;
+    public Double exchangeCurrency(String username, String from, double amount, String to) {
+        User user = userService.loadUserByUsername(username);
+        Currency account = loadByUser(user);
+        String uri = "https://api.exchangeratesapi.io/latest?base=" + from;
+        RestTemplate restTemplate = new RestTemplate();
+        HashMap<String, HashMap<String, Double>> res = restTemplate.getForObject(uri, HashMap.class);
+        System.out.println(res.get("rates").get(to));
+        return 0.0;
     }
 
     public void deposit(String username, String currency, double amount) {
