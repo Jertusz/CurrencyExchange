@@ -1,0 +1,71 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2020_02_04-initial-tables
+      author: jedrzej.szadejko
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            tableExists:
+              tableName: user
+        - onFail: MARK_RAN
+          not:
+            tableExists:
+              tableName: currency
+      changes:
+        - createTable:
+            tableName: user
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: user_id_pkey
+              - column:
+                  name: username
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: authority
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: currency
+            columns:
+              - column:
+                  name: user
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    foreignKeyName: user_id_pkey
+              - column:
+                  name: pln
+                  type: DECIMAL(9,2)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: usd
+                  type: DECIMAL(9,2)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: gbp
+                  type: DECIMAL(9,2)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: eur
+                  type: DECIMAL(9,2)
+                  constraints:
+                    nullable: true
