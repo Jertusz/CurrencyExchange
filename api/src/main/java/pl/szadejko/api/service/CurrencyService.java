@@ -1,16 +1,14 @@
 package pl.szadejko.api.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.szadejko.api.models.Currency;
 import pl.szadejko.api.repository.CurrencyRepository;
 import pl.szadejko.api.security.User;
-import pl.szadejko.api.security.UserRepository;
 import pl.szadejko.api.security.UserService;
 
-import static pl.szadejko.api.utils.HelperFunctions.*;
-
 import java.util.HashMap;
+
+import static pl.szadejko.api.utils.HelperFunctions.withdrawalPossible;
 
 @Service
 public class CurrencyService {
@@ -23,7 +21,8 @@ public class CurrencyService {
         this.userService = userService;
     }
 
-    public HashMap<String, Double> getBalance(User user) {
+    public HashMap<String, Double> getBalance(String username) {
+        User user = userService.loadUserByUsername(username);
         Currency account = loadByUser(user);
         HashMap<String, Double> balance = new HashMap<>();
         balance.put("PLN", account.getPln());
