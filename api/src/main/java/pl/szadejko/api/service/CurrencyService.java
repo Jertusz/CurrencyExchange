@@ -19,6 +19,7 @@ import static pl.szadejko.api.utils.HelperFunctions.withdrawalPossible;
 @Service
 public class CurrencyService {
 
+    private final String apiUri = "https://api.exchangeratesapi.io/latest?base=";
     private final CurrencyRepository currencyRepository;
     private final UserService userService;
 
@@ -39,23 +40,31 @@ public class CurrencyService {
     }
 
     public Double exchangeCurrency(String username, String from, double amount, String to) {
-        User user = userService.loadUserByUsername(username);
-        Currency account = loadByUser(user);
-        String uri = "https://api.exchangeratesapi.io/latest?base=" + from;
-        RestTemplate restTemplate = new RestTemplate();
-        HashMap<String, HashMap<String, Double>> res = restTemplate.getForObject(uri, HashMap.class);
+        String fullApiUri = apiUri + from;
         HashMap<String, Double> balance = getBalance(username);
-        double baseAmount = balance.get(from);
-        double targetRate = res.get("rates").get(to);
-        double targetAmount = amount * targetRate;
-        baseAmount -= amount;
-        deposit(username, to, targetAmount);
-        withdraw(username, from, amount);
-
+        double baseAmount, targetRate;
+        try {
+            baseAmount = balance.get(from);
+        } catch (Exception e) {
+            return 0.0;
+        }
+        if (amount <= baseAmount) {
+            RestTemplate restTemplate = new RestTemplate();
+            HashMap<String, HashMap<String, Double>> res = restTemplate.getForObject(fullApiUri, HashMap.class);
+            try {
+                targetRate = res.get("rates").get(to);
+            } catch (Exception e) {
+                return 0.0;
+            }
+            double targetAmount = amount * targetRate;
+            deposit(username, to, targetAmount);
+            withdraw(username, from, amount);
+            return targetAmount;
+        }
         return 0.0;
     }
 
-    public void deposit(String username, String currency, double amount) {
+    public boolean deposit(String username, String currency, double amount) {
         User user = userService.loadUserByUsername(username);
         Currency account = loadByUser(user);
         switch (currency) {
@@ -71,36 +80,50 @@ public class CurrencyService {
             case "USD":
                 account.setUsd(account.getUsd() + amount);
                 break;
+            default:
+                return false;
         }
         currencyRepository.save(account);
+        return true;
     }
 
-    public void withdraw(String username, String currency, double amount) {
+    public boolean withdraw(String username, String currency, double amount) {
         User user = userService.loadUserByUsername(username);
         Currency account = loadByUser(user);
         switch (currency) {
             case "PLN":
                 if (withdrawalPossible(account.getPln(), amount)) {
                     account.setPln(account.getPln() - amount);
+                } else {
+                    return false;
                 }
                 break;
             case "EUR":
                 if (withdrawalPossible(account.getEur(), amount)) {
                     account.setEur(account.getEur() - amount);
+                } else {
+                    return false;
                 }
                 break;
             case "GBP":
                 if (withdrawalPossible(account.getGbp(), amount)) {
                     account.setGbp(account.getGbp() - amount);
+                } else {
+                    return false;
                 }
                 break;
             case "USD":
                 if (withdrawalPossible(account.getUsd(), amount)) {
                     account.setUsd(account.getUsd() - amount);
+                } else {
+                    return false;
                 }
                 break;
+            default:
+                return false;
         }
         currencyRepository.save(account);
+        return true;
     }
 
     public Currency loadByUser(User user) {

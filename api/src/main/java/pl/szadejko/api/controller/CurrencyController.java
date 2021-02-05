@@ -17,14 +17,20 @@ public class CurrencyController {
 
     @PostMapping("/deposit/{currency}/{amount}")
     public ResponseEntity deposit(Authentication authentication, @PathVariable(name = "currency") String currency, @PathVariable(name = "amount") double amount) {
-        currencyService.deposit(authentication.getName(), currency, amount);
-        return new ResponseEntity(HttpStatus.ACCEPTED);
+        if(currencyService.deposit(authentication.getName(), currency, amount)){
+            return new ResponseEntity(HttpStatus.ACCEPTED);
+        } else {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping("/withdraw/{currency}/{amount}")
     public ResponseEntity withdraw(Authentication authentication, @PathVariable(name = "currency") String currency, @PathVariable(name = "amount") double amount) {
-        currencyService.withdraw(authentication.getName(), currency, amount);
-        return new ResponseEntity(HttpStatus.ACCEPTED);
+        if(currencyService.withdraw(authentication.getName(), currency, amount)){
+            return new ResponseEntity(HttpStatus.ACCEPTED);
+        } else {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/balance")
@@ -37,7 +43,10 @@ public class CurrencyController {
         String uri = "https://api.exchangeratesapi.io/latest?base=" + from;
         RestTemplate restTemplate = new RestTemplate();
         Object res = restTemplate.getForObject(uri, Object.class);
-        currencyService.exchangeCurrency(authentication.getName(), from, amount, to);
-        return new ResponseEntity(res, HttpStatus.OK);
+        double exchanged = currencyService.exchangeCurrency(authentication.getName(), from, amount, to);
+        if (exchanged != 0.0) {
+            return new ResponseEntity(exchanged, HttpStatus.OK);
+        }
+        return new ResponseEntity("Invalid amount, or currency does not exist", HttpStatus.BAD_REQUEST);
     }
 }
