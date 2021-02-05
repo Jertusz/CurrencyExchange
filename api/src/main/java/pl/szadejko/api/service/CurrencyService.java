@@ -44,7 +44,14 @@ public class CurrencyService {
         String uri = "https://api.exchangeratesapi.io/latest?base=" + from;
         RestTemplate restTemplate = new RestTemplate();
         HashMap<String, HashMap<String, Double>> res = restTemplate.getForObject(uri, HashMap.class);
-        System.out.println(res.get("rates").get(to));
+        HashMap<String, Double> balance = getBalance(username);
+        double baseAmount = balance.get(from);
+        double targetRate = res.get("rates").get(to);
+        double targetAmount = amount * targetRate;
+        baseAmount -= amount;
+        deposit(username, to, targetAmount);
+        withdraw(username, from, amount);
+
         return 0.0;
     }
 
